@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="content">
+        <h1>2X2 Rubik's Cube Solver</h1>
+        <p id="example">Example of input for a solved cube: WWWWGGOOBBRRGGOBRRYYY</p>
+        <input type="text" id="position" placeholder="Cube state">
+        <button onclick="solveCube()">Solve</button>
+        <p id="solved"></p>
+        <div id="solution"></div>
+        <br>
+        <button onclick="reset()" id="resetBtn" class="hidden">Reset</button>
+        <br>
+        <div class="info">
+            <h2>Info</h2>
+            <p class="infoP">This is a 2x2 Rubik's cube solver. It will solve any 2x2 Rubik's cube in 12 moves or less. The accepted colours are:</p>
+            <ul>
+                <li>White</li>
+                <li>Green</li>
+                <li>Orange</li>
+                <li>Blue</li>
+                <li>Red</li>
+                <li>Yellow</li>
+            </ul>
+            <p>*Use only the first letter of each colour, when typing in the cube positions.</p>
+            <img src="./Position_Structure.png" alt="Position_Structure.png" width="700" height="500">
+            <p>Type in the colors of you cube in this order. Make sure to place the piece with the colours orange, blue and yellow in the bottom left corner on the left side.</p>
+            <p>*Notice that you do not type any of the colours of the cube in the bottom left corner on the left side.</p>
+            <br>
+            
+        </div>
+        
+    </div>
+</body>
+<script src="main.js"></script>
+</html>
