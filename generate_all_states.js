@@ -1,3 +1,7 @@
+const fs = require("fs");
+
+// All your move functions: F, Fp, F2, R, Rp, R2, U, Up, U2
+// (use the ones from your original code)
 function F(pos){
     return (pos[6] + pos[14] + pos[2] +
             pos[3] + pos[5] + pos[13] +
@@ -88,106 +92,50 @@ function U2(pos){
                     pos[18] + pos[19] + pos[20])
         }
 
-
-function possibleStates(pos){
-    return Array({"F":F(pos)}, {"F2":F2(pos)}, {"F prime":Fp(pos)},
-                {"R":R(pos)}, {"R2": R2(pos)}, {"R prime":Rp(pos)}, 
-                {"U":U(pos)}, {"U2":U2(pos)}, {"U prime":Up(pos)})
+function possibleStates(pos) {
+    return [
+        {"F": F(pos)}, {"F2": F2(pos)}, {"F'": Fp(pos)},
+        {"R": R(pos)}, {"R2": R2(pos)}, {"R'": Rp(pos)},
+        {"U": U(pos)}, {"U2": U2(pos)}, {"U'": Up(pos)}
+    ];
 }
 
-let fileContent;
+// BFS to generate all states
+function generateStates() {
+    const solved = "WWWWGGOOBBRRGGOBRRYYY"; // replace with your solved state string
+    const visited = new Set();
+    const depths = [];
+    
+    let frontier = [solved];
+    visited.add(solved);
+    depths.push([solved]);
 
-let depths = {}
-
-async function solve(pos) {
-  try {
-    const response = await fetch('allvalidstates.txt');
-    fileContent = await response.text();
-  } catch (error) {
-    console.log(error);
-  }
-
-  const lines = fileContent.trim().split(/\r?\n/);
-
-  depths = {};
-  lines.forEach((line, depthIdx) => {
-    const tokens = line
-      .split(',')                                     // split states on commas
-      .map(s => s.trim().replace(/[\[\]'"]/g, ''))    // drop [ ] ' " if present
-      .map(s => s.replace(/[^A-Z]/g, ''))             // keep only letters
-      .filter(s => s.length === 21);                  // valid cube strings only
-    depths[depthIdx] = tokens;
-  });
-
-  function locate_state(p) {
-    for (let d = 0; d < lines.length; d++) {
-      if (depths[d] && depths[d].includes(p)) return d;
-    }
-    return null;
-  }
-
-  let depth = locate_state(pos);
-  if (depth == null) return null;
-
-  let position = pos;
-  const moves = [];
-
-  while (depth > 0) {
-    const positions = possibleStates(position);
-    let stepped = false;
-
-    for (const x of positions) {
-      for (const key in x) {
-        const nd = locate_state(x[key]);
-        if (nd !== null && nd < depth) {
-          depth = nd;
-          position = x[key];
-          moves.push(key);
-          stepped = true;
-          break;              // take the first improving move
+    let depth = 0;
+    while (frontier.length > 0) {
+        let nextFrontier = [];
+        for (let state of frontier) {
+            for (let move of possibleStates(state)) {
+                for (let k in move) {
+                    let newState = move[k];
+                    if (!visited.has(newState)) {
+                        visited.add(newState);
+                        nextFrontier.push(newState);
+                    }
+                }
+            }
         }
-      }
-      if (stepped) break;
-    }
-
-    if (!stepped) {
-      // could not find a neighbor with lower depth; stop to avoid infinite loop
-      break;
-    }
-  }
-
-  return moves;
-}
-
-
-async function solveCube(){
-    
-    let position = document.getElementById("position").value;
-    if(position == "" || position.length != 21){
-        document.getElementById("solution").innerHTML = "Input not acceptable";
-        return;
-    }
-
-    document.getElementById("solution").innerHTML = "";
-
-    position = position.toUpperCase();
-    let moves = await solve(position);
-
-    if(moves == null){
-        document.getElementById("solution").innerHTML = "Specified cube state is not possible";
-    }
-    else{
-    document.getElementById("solved").innerHTML = "The moves needed to solve the cube are:"
-
-    
-    for (let i = 0; i < moves.length; i++) {
-        document.getElementById("solution").innerHTML +=i+1 +". "+moves[i] + "</br>";
-        
+        if (nextFrontier.length > 0) {
+            depths.push(nextFrontier);
         }
+        frontier = nextFrontier;
+        depth++;
+        console.log(`Depth ${depth}: ${nextFrontier.length} states`);
     }
-    document.getElementById('resetBtn').style.display = 'block';
-    
+
+    // Save to file
+    let fileContent = depths.map(layer => layer.join(",")).join("\n");
+    fs.writeFileSync("allValidStates.txt", fileContent);
+    console.log("✅ allValidStates.txt generated!");
 }
-function reset(){
-    window.location.reload()
-}
+
+generateStates();
